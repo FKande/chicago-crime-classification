@@ -38,7 +38,7 @@ def original_implementation():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("chicago_crime.csv", low_memory=False)
+    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
 
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -252,7 +252,7 @@ def original_categories_implementation():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("chicago_crime.csv", low_memory=False)
+    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
 
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -433,7 +433,7 @@ def balanced_implementation_2246():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("chicago_crime.csv", low_memory=False)
+    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
 
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -662,7 +662,7 @@ def balanced_implementation_5000():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("chicago_crime.csv", low_memory=False)
+    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
 
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -894,7 +894,7 @@ def balanced_implementation_5000_temp():
     start_time = time.time()
     
     try:
-        temp_lookup_df = pd.read_csv("temperature_lookup.csv")
+        temp_lookup_df = pd.read_csv("data/temperature_lookup.csv")
         log_progress(f"Temperature lookup file loaded with {len(temp_lookup_df)} entries")
         
         # Convert date column to datetime for merging
@@ -915,7 +915,7 @@ def balanced_implementation_5000_temp():
     log_progress("Loading and filtering crime data...")
     start_time = time.time()
     
-    df = pd.read_csv("chicago_crime.csv", low_memory=False)
+    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
     log_progress(f"Raw crime data loaded: {df.shape[0]} records")
 
     # Convert 'Date' to datetime and filter for years 2013–2017
@@ -1248,7 +1248,7 @@ def balanced_implementation_5000_temp():
 ###############################################################################
 def create_visualizations(results):
     # Create figures directory if it doesn't exist
-    figures_dir = 'figures'
+    figures_dir = 'data/figures'
     os.makedirs(figures_dir, exist_ok=True)
 
     # 1. Overall Accuracy Comparison

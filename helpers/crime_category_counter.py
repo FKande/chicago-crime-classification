@@ -29,7 +29,7 @@ def count_crime_categories(csv_file_path):
     
     return crime_counts
 
-def save_crime_stats(csv_file_path, output_file='crime_statistics.csv'):
+def save_crime_stats(csv_file_path, output_file='data/crime_statistics.csv'):
     """
     Saves crime category statistics to a CSV file.
     
@@ -52,6 +52,6 @@ def save_crime_stats(csv_file_path, output_file='crime_statistics.csv'):
 
 if __name__ == "__main__":
     # Example usage
-    csv_file_path = "chicago_crime.csv"
+    csv_file_path = "data/chicago_crime.csv"
     crime_counts = count_crime_categories(csv_file_path)
     save_crime_stats(csv_file_path)

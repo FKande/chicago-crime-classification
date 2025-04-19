@@ -13,7 +13,7 @@ def create_temperature_lookup_file():
     
     # Load the temperature data
     log_progress("Loading temperature data...")
-    temp_df = pd.read_csv("temperature.csv")
+    temp_df = pd.read_csv("data/temperature.csv")
     
     # Convert datetime column to datetime type and create date and hour columns
     log_progress("Processing datetime columns...")
@@ -53,7 +53,7 @@ def create_temperature_lookup_file():
         lookup_df['temperature'].fillna(mean_temp, inplace=True)
     
     # Save the lookup table
-    output_file = "temperature_lookup.csv"
+    output_file = "data/temperature_lookup.csv"
     log_progress(f"Saving lookup table to {output_file}...")
     lookup_df.to_csv(output_file, index=False)
     
