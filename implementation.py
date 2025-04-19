@@ -1263,7 +1263,7 @@ def balanced_implementation_5000_temp(crime_df):
 ###############################################################################
 def create_visualizations(results):
     # Create figures directory if it doesn't exist
-    figures_dir = 'data/figures'
+    figures_dir = 'figures'  # Changed from 'data/figures' to 'figures'
     os.makedirs(figures_dir, exist_ok=True)
 
     # 1. Overall Accuracy Comparison
