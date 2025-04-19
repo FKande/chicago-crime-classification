@@ -24,9 +24,12 @@ def log_progress(message):
 ###############################################################################
 # ORIGINAL IMPLEMENTATION - 4 UMBRELLA CATEGORIES
 ###############################################################################
-def original_implementation():
+def original_implementation(crime_df):
     """
     Original implementation using the 4 umbrella categories as described in the paper
+    
+    Parameters:
+    crime_df (DataFrame): The loaded Chicago crime dataset
     """
     start_implementation_time = time.time()
     log_progress("Starting original implementation...")
@@ -38,8 +41,10 @@ def original_implementation():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
-
+    
+    # Create a deep copy to avoid modifying the original dataframe
+    df = crime_df.copy(deep=True)
+    
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
     df = df.dropna(subset=['Date'])  # remove rows where Date failed to parse
@@ -238,7 +243,7 @@ def original_implementation():
 ###############################################################################
 # IMPLEMENTATION 2 - ORIGINAL CATEGORIES (UNBALANCED)
 ###############################################################################
-def original_categories_implementation():
+def original_categories_implementation(crime_df):
     """
     Implementation using original crime categories without resampling
     """
@@ -252,7 +257,9 @@ def original_categories_implementation():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
+
+    # Create a deep copy to avoid modifying the original dataframe
+    df = crime_df.copy(deep=True)
 
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -419,7 +426,7 @@ def original_categories_implementation():
 ###############################################################################
 # IMPLEMENTATION 3 - BALANCED DATASET (2246 SAMPLES PER CATEGORY)
 ###############################################################################
-def balanced_implementation_2246():
+def balanced_implementation_2246(crime_df):
     """
     Implementation using balanced dataset with 2246 samples per category
     """
@@ -433,7 +440,9 @@ def balanced_implementation_2246():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
+
+    # Create a deep copy to avoid modifying the original dataframe
+    df = crime_df.copy(deep=True)
 
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -648,7 +657,7 @@ def balanced_implementation_2246():
 ###############################################################################
 # IMPLEMENTATION 4 - BALANCED DATASET (5000 SAMPLES PER CATEGORY)
 ###############################################################################
-def balanced_implementation_5000():
+def balanced_implementation_5000(crime_df):
     """
     Implementation using balanced dataset with 5000 samples per category
     """
@@ -662,7 +671,9 @@ def balanced_implementation_5000():
     # 1. LOAD AND FILTER THE DATA
     log_progress("Loading and filtering data...")
     start_time = time.time()
-    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
+
+    # Create a deep copy to avoid modifying the original dataframe
+    df = crime_df.copy(deep=True)
 
     # Convert 'Date' to datetime and filter for years 2013–2017
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -877,10 +888,13 @@ def balanced_implementation_5000():
 ###############################################################################
 # IMPLEMENTATION 5 - BALANCED DATASET WITH TEMPERATURE (5000 SAMPLES PER CATEGORY)
 ###############################################################################
-def balanced_implementation_5000_temp():
+def balanced_implementation_5000_temp(crime_df):
     """
     Implementation using balanced dataset with 5000 samples per category plus temperature data
     OPTIMIZED VERSION using pre-computed temperature lookup file
+    
+    Parameters:
+    crime_df (DataFrame): The loaded Chicago crime dataset
     """
     start_implementation_time = time.time()
     log_progress("Starting implementation...")
@@ -912,10 +926,11 @@ def balanced_implementation_5000_temp():
     log_progress(f"Temperature lookup data loaded in {time.time() - start_time:.2f} seconds")
     
     # 2. LOAD AND FILTER THE CRIME DATA
-    log_progress("Loading and filtering crime data...")
+    log_progress("Filtering crime data...")
     start_time = time.time()
     
-    df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
+    # Create a deep copy to avoid modifying the original dataframe
+    df = crime_df.copy(deep=True)
     log_progress(f"Raw crime data loaded: {df.shape[0]} records")
 
     # Convert 'Date' to datetime and filter for years 2013–2017
@@ -1627,13 +1642,19 @@ def run_all_and_compare():
     start_total_time = time.time()
     log_progress("Starting all implementations...")
     
-    # Run all implementations
+    # Load the Chicago crime data once
+    log_progress("Loading Chicago crime data...")
+    data_load_start = time.time()
+    crime_df = pd.read_csv("data/chicago_crime.csv", low_memory=False)
+    log_progress(f"Chicago crime data loaded in {time.time() - data_load_start:.2f} seconds")
+    
+    # Run all implementations, passing the loaded dataframe to each
     results = []
-    results.append(original_implementation())
-    results.append(original_categories_implementation())
-    results.append(balanced_implementation_2246())
-    results.append(balanced_implementation_5000())
-    results.append(balanced_implementation_5000_temp())
+    results.append(original_implementation(crime_df))
+    results.append(original_categories_implementation(crime_df))
+    results.append(balanced_implementation_2246(crime_df))
+    results.append(balanced_implementation_5000(crime_df))
+    results.append(balanced_implementation_5000_temp(crime_df))
     
     # Create visualizations
     log_progress("Creating visualizations...")
