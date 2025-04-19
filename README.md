@@ -10,6 +10,40 @@ This repository contains a comprehensive implementation of crime classification 
   ```bash
   python --version
   ```
+- If you are not on Python 3.13.1, you can install or switch using one of the following methods:
+
+  **Using `pyenv`** (recommended for macOS/Linux):
+  ```bash
+  # Install pyenv if not already installed
+  curl https://pyenv.run | bash
+  # Restart your shell, then:
+  pyenv install 3.13.1
+  pyenv global 3.13.1
+  ```
+
+  **Using `venv` and system Python**:
+  ```bash
+  # Create a virtual environment with system Python
+  python -m venv venv
+  # Activate the environment
+  source venv/bin/activate   # On Windows: venv\\Scripts\\activate
+  # (If your system Python is not 3.13.1, install it through your package manager or from python.org)
+  ```
+
+  **On Linux (Ubuntu/Debian) via `apt`**:
+  ```bash
+  sudo apt update
+  sudo apt install python3.13 python3.13-venv
+  python3.13 -m venv venv
+  source venv/bin/activate
+  ```
+
+  **On macOS via Homebrew**:
+  ```bash
+  brew update
+  brew install python@3.13
+  brew link --force --overwrite python@3.13
+  ```
 
 ### Editor
 
@@ -20,7 +54,7 @@ This repository contains a comprehensive implementation of crime classification 
 - It is best practice to create and activate a virtual environment before installing dependencies:
   ```bash
   python -m venv venv
-  source venv/bin/activate   # On Windows use `venv\\Scripts\\activate`
+  source venv/bin/activate   # On Windows: venv\\Scripts\\activate
   ```
 
 ### Required Libraries
