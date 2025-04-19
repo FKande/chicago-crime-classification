@@ -1,6 +1,17 @@
 # Chicago Crime Classification Project
 
+> **Note:** A full run takes approximately **4 minutes** on average.
+>
+> **Important:** **You must download the dataset (not included in this repository) from [this link](https://drive.google.com/file/d/18f47YB0SgvsYPEUG7an4AxoDGzE7ThwA/view?usp=sharing) for the code to work.**
+
 This repository contains a comprehensive implementation of crime classification models for Chicago crime data, exploring various approaches to categorize crimes based on their characteristics.
+
+## Getting Started
+
+1. **Install Python** (version 3.13.1 recommended) or ensure it is available on your system.
+2. **Clone this repository**
+
+3. **Open the project** in a text editor or IDE such as **Visual Studio Code** (VSCode).
 
 ## Prerequisites
 
@@ -45,10 +56,6 @@ This repository contains a comprehensive implementation of crime classification 
   brew link --force --overwrite python@3.13
   ```
 
-### Editor
-
-- It is recommended to use a text editor or IDE such as **Visual Studio Code** (VSCode) for editing and running scripts.
-
 ### Virtual Environment
 
 - It is best practice to create and activate a virtual environment before installing dependencies:
@@ -56,6 +63,8 @@ This repository contains a comprehensive implementation of crime classification 
   python -m venv venv
   source venv/bin/activate   # On Windows: venv\\Scripts\\activate
   ```
+
+> **Note:** The environment and package compatibility instructions below are provided as a fallback; if you regularly use Python, the code is likely to run without additional configuration.
 
 ### Required Libraries
 
@@ -76,10 +85,13 @@ This repository contains a comprehensive implementation of crime classification 
 
 ## Data Setup
 
-1. Download the Chicago crime dataset from [this Google Drive link](https://drive.google.com/file/d/18f47YB0SgvsYPEUG7an4AxoDGzE7ThwA/view?usp=sharing).
+1. Download the Chicago crime dataset from [this link](https://drive.google.com/file/d/18f47YB0SgvsYPEUG7an4AxoDGzE7ThwA/view?usp=sharing).
+
+   > **Heads up:** The zipped dataset is around **0.5 GB**, so it may take several minutes to download depending on your connection.
+
 2. Unzip the downloaded file.
 3. Ensure you are in the root directory of the project (`chicago-crime`).
-4. Place the unzipped `chicago_crime.csv` file in the `data` folder:
+4. **<span style="color:red">IMPORTANT:</span>** **After unzipping, extract the `chicago_crime.csv` file and move it directly into the `data/` directory (not the containing folder).**
    ```bash
    mv path/to/chicago_crime.csv data/
    ```
