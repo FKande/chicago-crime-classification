@@ -10,7 +10,7 @@ from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 from sklearn.feature_selection import mutual_info_classif
 
 ###############################################################################
@@ -20,6 +20,18 @@ def log_progress(message):
     """Helper function to log progress with timestamps"""
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"[{timestamp}] {message}")
+
+# NEW: Helper function to calculate category-specific accuracy
+def calculate_category_accuracy(y_true, y_pred, category):
+    """Calculate accuracy for a specific category"""
+    mask = (y_true == category)
+    total = mask.sum()
+    if total == 0:
+        return 0.0
+    correct = (y_true[mask] == y_pred[mask]).sum()
+    accuracy = (correct / total) * 100
+    print(f"Category '{category}' accuracy: {accuracy:.2f}% ({correct}/{total})")
+    return accuracy
 
 ###############################################################################
 # ORIGINAL IMPLEMENTATION - 4 UMBRELLA CATEGORIES
@@ -136,6 +148,16 @@ def original_implementation(crime_df):
     X_all = df[candidate_features].copy()
     y_all = df['Crime_Category'].copy()
 
+    # NEW: Calculate initial feature importance using mutual information
+    mi_scores = mutual_info_classif(X_all, y_all, random_state=100)
+    mi_results = pd.DataFrame({
+        'Feature': candidate_features,
+        'MI Score': mi_scores
+    }).sort_values('MI Score', ascending=False)
+    
+    print("\nInitial feature importance by mutual information:")
+    print(mi_results)
+
     def evaluate_feature_set(features):
         """Train a quick Decision Tree and return accuracy on a 70-30 split."""
         X_train, X_test, y_train, y_test = train_test_split(
@@ -172,6 +194,7 @@ def original_implementation(crime_df):
         if top_acc > best_accuracy:
             current_features.remove(top_feature)
             improved = True
+            print(f"Dropped feature '{top_feature}', new accuracy: {top_acc:.4f}, remaining features: {len(current_features)}")
 
     print("\nSelected features after approximate backward elimination:")
     print(current_features)
@@ -223,9 +246,23 @@ def original_implementation(crime_df):
             correct = (y_true[c_mask] == y_pred[c_mask]).sum()
             total = c_mask.sum()
             print(f"Class '{c}': Correct: {correct} | Incorrect: {total - correct} | Total: {total}")
+            # Calculate category-specific accuracy
+            cat_acc = (correct / total) * 100
+            print(f"  Accuracy: {cat_acc:.2f}%")
+            
+        # NEW: Add confusion matrix
+        print("\nConfusion Matrix:")
+        cm = confusion_matrix(y_true, y_pred, labels=sorted(y_true.unique()))
+        cm_df = pd.DataFrame(cm, index=sorted(y_true.unique()), columns=sorted(y_true.unique()))
+        print(cm_df)
 
     evaluate_model("Decision Tree (Entropy)", y_test, dt_pred)
     evaluate_model("Naive Bayes", y_test, nb_pred)
+    
+    # NEW: Calculate specific PUBLIC_PEACE_VIOLATION category accuracy
+    print("\nSpecific analysis for PUBLIC_PEACE_VIOLATION category:")
+    ppv_dt_acc = calculate_category_accuracy(y_test, dt_pred, "PUBLIC_PEACE_VIOLATION")
+    ppv_nb_acc = calculate_category_accuracy(y_test, nb_pred, "PUBLIC_PEACE_VIOLATION")
     
     elapsed_time = time.time() - start_implementation_time
     log_progress(f"Original implementation completed in {elapsed_time:.2f} seconds")
@@ -234,10 +271,13 @@ def original_implementation(crime_df):
         "implementation": "Original (4 categories)",
         "dt_accuracy": accuracy_score(y_test, dt_pred) * 100,
         "nb_accuracy": accuracy_score(y_test, nb_pred) * 100,
+        "ppv_dt_accuracy": ppv_dt_acc,  # NEW
+        "ppv_nb_accuracy": ppv_nb_acc,  # NEW
         "y_test": y_test,
         "dt_pred": dt_pred,
         "nb_pred": nb_pred,
-        "elapsed_time": elapsed_time
+        "elapsed_time": elapsed_time,
+        "feature_count": len(current_features)  # NEW
     }
 
 ###############################################################################
@@ -319,6 +359,16 @@ def original_categories_implementation(crime_df):
     X_all = df[candidate_features].copy()
     y_all = df['Primary Type'].copy()
 
+    # NEW: Calculate initial feature importance
+    mi_scores = mutual_info_classif(X_all, y_all, random_state=100)
+    mi_results = pd.DataFrame({
+        'Feature': candidate_features,
+        'MI Score': mi_scores
+    }).sort_values('MI Score', ascending=False)
+    
+    print("\nInitial feature importance by mutual information:")
+    print(mi_results)
+
     def evaluate_feature_set(features):
         """Train a quick Decision Tree and return accuracy on a 70-30 split."""
         X_train, X_test, y_train, y_test = train_test_split(
@@ -355,6 +405,7 @@ def original_categories_implementation(crime_df):
         if top_acc > best_accuracy:
             current_features.remove(top_feature)
             improved = True
+            print(f"Dropped feature '{top_feature}', new accuracy: {top_acc:.4f}, remaining features: {len(current_features)}")
 
     print("\nSelected features after approximate backward elimination:")
     print(current_features)
@@ -406,9 +457,18 @@ def original_categories_implementation(crime_df):
             correct = (y_true[c_mask] == y_pred[c_mask]).sum()
             total = c_mask.sum()
             print(f"Class '{c}': Correct: {correct} | Incorrect: {total - correct} | Total: {total}")
+            # Calculate category-specific accuracy
+            if total > 0:
+                cat_acc = (correct / total) * 100
+                print(f"  Accuracy: {cat_acc:.2f}%")
 
     evaluate_model("Decision Tree (Entropy)", y_test, dt_pred)
     evaluate_model("Naive Bayes", y_test, nb_pred)
+    
+    # NEW: Calculate specific PUBLIC_PEACE_VIOLATION category accuracy
+    print("\nSpecific analysis for PUBLIC PEACE VIOLATION category:")
+    ppv_dt_acc = calculate_category_accuracy(y_test, dt_pred, "PUBLIC PEACE VIOLATION") 
+    ppv_nb_acc = calculate_category_accuracy(y_test, nb_pred, "PUBLIC PEACE VIOLATION")
     
     elapsed_time = time.time() - start_implementation_time
     log_progress(f"Implementation completed in {elapsed_time:.2f} seconds")
@@ -417,10 +477,13 @@ def original_categories_implementation(crime_df):
         "implementation": "Original Categories (Unbalanced)",
         "dt_accuracy": accuracy_score(y_test, dt_pred) * 100,
         "nb_accuracy": accuracy_score(y_test, nb_pred) * 100,
+        "ppv_dt_accuracy": ppv_dt_acc,  # NEW
+        "ppv_nb_accuracy": ppv_nb_acc,  # NEW
         "y_test": y_test,
         "dt_pred": dt_pred,
         "nb_pred": nb_pred,
-        "elapsed_time": elapsed_time
+        "elapsed_time": elapsed_time,
+        "feature_count": len(current_features)  # NEW
     }
 
 ###############################################################################
@@ -550,6 +613,16 @@ def balanced_implementation_2246(crime_df):
     X_all = df[candidate_features].copy()
     y_all = df['Primary Type'].copy()
 
+    # NEW: Calculate initial feature importance
+    mi_scores = mutual_info_classif(X_all, y_all, random_state=100)
+    mi_results = pd.DataFrame({
+        'Feature': candidate_features,
+        'MI Score': mi_scores
+    }).sort_values('MI Score', ascending=False)
+    
+    print("\nInitial feature importance by mutual information:")
+    print(mi_results)
+
     def evaluate_feature_set(features):
         """Train a quick Decision Tree and return accuracy on a 70-30 split."""
         X_train, X_test, y_train, y_test = train_test_split(
@@ -586,6 +659,7 @@ def balanced_implementation_2246(crime_df):
         if top_acc > best_accuracy:
             current_features.remove(top_feature)
             improved = True
+            print(f"Dropped feature '{top_feature}', new accuracy: {top_acc:.4f}, remaining features: {len(current_features)}")
 
     print("\nSelected features after approximate backward elimination:")
     print(current_features)
@@ -637,9 +711,18 @@ def balanced_implementation_2246(crime_df):
             correct = (y_true[c_mask] == y_pred[c_mask]).sum()
             total = c_mask.sum()
             print(f"Class '{c}': Correct: {correct} | Incorrect: {total - correct} | Total: {total}")
+            # Calculate category-specific accuracy
+            if total > 0:
+                cat_acc = (correct / total) * 100
+                print(f"  Accuracy: {cat_acc:.2f}%")
 
     evaluate_model("Decision Tree (Entropy)", y_test, dt_pred)
     evaluate_model("Naive Bayes", y_test, nb_pred)
+    
+    # NEW: Calculate specific PUBLIC_PEACE_VIOLATION category accuracy
+    print("\nSpecific analysis for PUBLIC PEACE VIOLATION category:")
+    ppv_dt_acc = calculate_category_accuracy(y_test, dt_pred, "PUBLIC PEACE VIOLATION")
+    ppv_nb_acc = calculate_category_accuracy(y_test, nb_pred, "PUBLIC PEACE VIOLATION")
     
     elapsed_time = time.time() - start_implementation_time
     log_progress(f"Implementation completed in {elapsed_time:.2f} seconds")
@@ -648,10 +731,13 @@ def balanced_implementation_2246(crime_df):
         "implementation": "Balanced (2246 per category)",
         "dt_accuracy": accuracy_score(y_test, dt_pred) * 100,
         "nb_accuracy": accuracy_score(y_test, nb_pred) * 100,
+        "ppv_dt_accuracy": ppv_dt_acc,  # NEW
+        "ppv_nb_accuracy": ppv_nb_acc,  # NEW
         "y_test": y_test,
         "dt_pred": dt_pred,
         "nb_pred": nb_pred,
-        "elapsed_time": elapsed_time
+        "elapsed_time": elapsed_time,
+        "feature_count": len(current_features)  # NEW
     }
 
 ###############################################################################
@@ -781,6 +867,16 @@ def balanced_implementation_5000(crime_df):
     X_all = df[candidate_features].copy()
     y_all = df['Primary Type'].copy()
 
+    # NEW: Calculate initial feature importance
+    mi_scores = mutual_info_classif(X_all, y_all, random_state=100)
+    mi_results = pd.DataFrame({
+        'Feature': candidate_features,
+        'MI Score': mi_scores
+    }).sort_values('MI Score', ascending=False)
+    
+    print("\nInitial feature importance by mutual information:")
+    print(mi_results)
+
     def evaluate_feature_set(features):
         """Train a quick Decision Tree and return accuracy on a 70-30 split."""
         X_train, X_test, y_train, y_test = train_test_split(
@@ -817,6 +913,7 @@ def balanced_implementation_5000(crime_df):
         if top_acc > best_accuracy:
             current_features.remove(top_feature)
             improved = True
+            print(f"Dropped feature '{top_feature}', new accuracy: {top_acc:.4f}, remaining features: {len(current_features)}")
 
     print("\nSelected features after approximate backward elimination:")
     print(current_features)
@@ -868,9 +965,18 @@ def balanced_implementation_5000(crime_df):
             correct = (y_true[c_mask] == y_pred[c_mask]).sum()
             total = c_mask.sum()
             print(f"Class '{c}': Correct: {correct} | Incorrect: {total - correct} | Total: {total}")
+            # Calculate category-specific accuracy
+            if total > 0:
+                cat_acc = (correct / total) * 100
+                print(f"  Accuracy: {cat_acc:.2f}%")
 
     evaluate_model("Decision Tree (Entropy)", y_test, dt_pred)
     evaluate_model("Naive Bayes", y_test, nb_pred)
+    
+    # NEW: Calculate specific PUBLIC_PEACE_VIOLATION category accuracy
+    print("\nSpecific analysis for PUBLIC PEACE VIOLATION category:")
+    ppv_dt_acc = calculate_category_accuracy(y_test, dt_pred, "PUBLIC PEACE VIOLATION")
+    ppv_nb_acc = calculate_category_accuracy(y_test, nb_pred, "PUBLIC PEACE VIOLATION")
     
     elapsed_time = time.time() - start_implementation_time
     log_progress(f"Implementation completed in {elapsed_time:.2f} seconds")
@@ -879,10 +985,13 @@ def balanced_implementation_5000(crime_df):
         "implementation": "Balanced (5000 per category)",
         "dt_accuracy": accuracy_score(y_test, dt_pred) * 100,
         "nb_accuracy": accuracy_score(y_test, nb_pred) * 100,
+        "ppv_dt_accuracy": ppv_dt_acc,  # NEW
+        "ppv_nb_accuracy": ppv_nb_acc,  # NEW 
         "y_test": y_test,
         "dt_pred": dt_pred,
         "nb_pred": nb_pred,
-        "elapsed_time": elapsed_time
+        "elapsed_time": elapsed_time,
+        "feature_count": len(current_features)  # NEW
     }
 
 ###############################################################################
@@ -1158,9 +1267,18 @@ def balanced_implementation_5000_temp(crime_df):
             correct = (y_true[c_mask] == y_pred[c_mask]).sum()
             total = c_mask.sum()
             print(f"Class '{c}': Correct: {correct} | Incorrect: {total - correct} | Total: {total}")
+            # Calculate category-specific accuracy
+            if total > 0:
+                cat_acc = (correct / total) * 100
+                print(f"  Accuracy: {cat_acc:.2f}%")
 
     evaluate_model("Decision Tree (Entropy) with Temperature", y_test, dt_pred)
     evaluate_model("Naive Bayes with Temperature", y_test, nb_pred)
+    
+    # NEW: Calculate specific PUBLIC_PEACE_VIOLATION category accuracy
+    print("\nSpecific analysis for PUBLIC PEACE VIOLATION category:")
+    ppv_dt_acc = calculate_category_accuracy(y_test, dt_pred, "PUBLIC PEACE VIOLATION")
+    ppv_nb_acc = calculate_category_accuracy(y_test, nb_pred, "PUBLIC PEACE VIOLATION")
     
     # 12. ANALYZE TEMPERATURE EFFECT ON SPECIFIC CRIME TYPES
     log_progress("Analyzing temperature effect on crime types...")
@@ -1199,19 +1317,35 @@ def balanced_implementation_5000_temp(crime_df):
                 'Count': len(group_data)
             }
         
-        # Apply the function to each group with include_groups=False to avoid warning
+       # Apply the function to each group with include_groups=False to avoid warning
         temp_accuracy = test_results_copy.groupby('Temp_Bin', observed=True).apply(
-            calculate_accuracy
-        ).reset_index()
-        
+            lambda x: pd.Series({
+                'DT_Accuracy': accuracy_score(x['Primary_Type'], x['DT_Prediction']) * 100,
+                'NB_Accuracy': accuracy_score(x['Primary_Type'], x['NB_Prediction']) * 100,
+                'Count': len(x)
+            })
+        )
+
         log_progress("Accuracy by temperature range:")
-        for _, row in temp_accuracy.iterrows():
-            bin_range = row['Temp_Bin']
-            stats = row[0]  # Access the dictionary with accuracies
-            print(f"Temp range {bin_range}: DT: {stats['DT_Accuracy']:.2f}%, NB: {stats['NB_Accuracy']:.2f}%, Count: {stats['Count']}")
+        for index, row in temp_accuracy.iterrows():
+            # Handle different pandas versions - index might be an Interval object directly
+            if hasattr(index, 'left') and hasattr(index, 'right'):
+                # This is an Interval object
+                bin_range = f"({index.left:.1f}, {index.right:.1f})"
+            else:
+                # This is a tuple or other index
+                bin_range = str(index)
+            
+            dt_acc = row['DT_Accuracy']
+            nb_acc = row['NB_Accuracy']
+            count = row['Count']
+            print(f"Temp range {bin_range}: DT: {dt_acc:.2f}%, NB: {nb_acc:.2f}%, Count: {count}")
         
         # Check if any crime types have significant temperature correlations
         log_progress("Analyzing temperature correlation with prediction accuracy by crime type:")
+        
+        # NEW: Create a table to store correlation results
+        crime_temp_correlations = []
         
         for crime_type in test_results['Primary_Type'].unique():
             # Create a new DataFrame for this crime type to avoid warnings
@@ -1232,14 +1366,29 @@ def balanced_implementation_5000_temp(crime_df):
                     dt_corr = np.corrcoef(crime_results['Temperature'].values, dt_correct.values)[0, 1]
                     nb_corr = np.corrcoef(crime_results['Temperature'].values, nb_correct.values)[0, 1]
                     
+                    # Store results
+                    crime_temp_correlations.append({
+                        'Crime_Type': crime_type,
+                        'DT_Correlation': dt_corr,
+                        'NB_Correlation': nb_corr,
+                        'Sample_Count': len(crime_results)
+                    })
                     # Only report if correlation is notable and not NaN
                     if (abs(dt_corr) > 0.1 or abs(nb_corr) > 0.1) and not (np.isnan(dt_corr) or np.isnan(nb_corr)):
                         print(f"Crime type '{crime_type}':")
                         print(f"  DT correlation with temperature: {dt_corr:.4f}")
                         print(f"  NB correlation with temperature: {nb_corr:.4f}")
+                        print(f"  Sample count: {len(crime_results)}")
                 except:
                     # If correlation calculation fails, just continue to the next crime type
                     continue
+        
+        # NEW: Print correlation table
+        if crime_temp_correlations:
+            print("\nTemperature correlation summary table:")
+            corr_df = pd.DataFrame(crime_temp_correlations)
+            corr_df = corr_df.sort_values('NB_Correlation', key=abs, ascending=False)
+            print(corr_df)
     
     log_progress("Implementation 5 completed!")
     
@@ -1250,12 +1399,16 @@ def balanced_implementation_5000_temp(crime_df):
         "implementation": "Balanced (5000/cat) + Temperature",
         "dt_accuracy": accuracy_score(y_test, dt_pred) * 100,
         "nb_accuracy": accuracy_score(y_test, nb_pred) * 100,
+        "ppv_dt_accuracy": ppv_dt_acc,  # NEW
+        "ppv_nb_accuracy": ppv_nb_acc,  # NEW
         "y_test": y_test,
         "dt_pred": dt_pred,
         "nb_pred": nb_pred,
         "has_temperature": True,
         "test_results": test_results if 'Temperature' in X_test.columns else None,
-        "elapsed_time": elapsed_time
+        "temp_correlation_data": crime_temp_correlations if 'Temperature' in X_test.columns else None,  # NEW
+        "elapsed_time": elapsed_time,
+        "feature_count": len(selected_features)  # NEW
     }
 
 ###############################################################################
@@ -1314,47 +1467,24 @@ def create_visualizations(results):
     # Data for PUBLIC PEACE VIOLATION accuracy in each implementation
     ppv_accuracies = []
     
-    # For implementation 1 (4 categories)
-    mask = (results[0]["y_test"] == "PUBLIC_PEACE_VIOLATION")
-    correct = (results[0]["y_test"][mask] == results[0]["nb_pred"][mask]).sum()
-    total = mask.sum()
-    ppv_accuracies.append((correct / total) * 100)
-    
-    # For implementation 2 (unbalanced original)
-    if "PUBLIC PEACE VIOLATION" in results[1]["y_test"].unique():
-        mask = (results[1]["y_test"] == "PUBLIC PEACE VIOLATION")
-        correct = (results[1]["y_test"][mask] == results[1]["nb_pred"][mask]).sum()
-        total = mask.sum()
-        ppv_accuracies.append((correct / total) * 100 if total > 0 else 0)
-    else:
-        ppv_accuracies.append(0)
-    
-    # For implementation 3 (2246 balanced)
-    if "PUBLIC PEACE VIOLATION" in results[2]["y_test"].unique():
-        mask = (results[2]["y_test"] == "PUBLIC PEACE VIOLATION")
-        correct = (results[2]["y_test"][mask] == results[2]["nb_pred"][mask]).sum()
-        total = mask.sum()
-        ppv_accuracies.append((correct / total) * 100 if total > 0 else 0)
-    else:
-        ppv_accuracies.append(0)
-    
-    # For implementation 4 (5000 balanced)
-    if "PUBLIC PEACE VIOLATION" in results[3]["y_test"].unique():
-        mask = (results[3]["y_test"] == "PUBLIC PEACE VIOLATION")
-        correct = (results[3]["y_test"][mask] == results[3]["nb_pred"][mask]).sum()
-        total = mask.sum()
-        ppv_accuracies.append((correct / total) * 100 if total > 0 else 0)
-    else:
-        ppv_accuracies.append(0)
-        
-    # For implementation 5 (5000 balanced with temperature)
-    if len(results) > 4 and "PUBLIC PEACE VIOLATION" in results[4]["y_test"].unique():
-        mask = (results[4]["y_test"] == "PUBLIC PEACE VIOLATION")
-        correct = (results[4]["y_test"][mask] == results[4]["nb_pred"][mask]).sum()
-        total = mask.sum()
-        ppv_accuracies.append((correct / total) * 100 if total > 0 else 0)
-    else:
-        ppv_accuracies.append(0)
+    # NEW: Use the ppv_nb_accuracy values stored in results
+    for r in results:
+        if "ppv_nb_accuracy" in r:
+            ppv_accuracies.append(r["ppv_nb_accuracy"])
+        else:
+            # For backward compatibility
+            if "PUBLIC_PEACE_VIOLATION" in r["y_test"].unique():
+                mask = (r["y_test"] == "PUBLIC_PEACE_VIOLATION")
+                correct = (r["y_test"][mask] == r["nb_pred"][mask]).sum()
+                total = mask.sum()
+                ppv_accuracies.append((correct / total) * 100 if total > 0 else 0)
+            elif "PUBLIC PEACE VIOLATION" in r["y_test"].unique():
+                mask = (r["y_test"] == "PUBLIC PEACE VIOLATION")
+                correct = (r["y_test"][mask] == r["nb_pred"][mask]).sum()
+                total = mask.sum()
+                ppv_accuracies.append((correct / total) * 100 if total > 0 else 0)
+            else:
+                ppv_accuracies.append(0)
     
     # Create the bar chart
     names = ["Original (4 cat)", "Original Categories", "Balanced (2246/cat)", "Balanced (5000/cat)", "Balanced + Temp"]
@@ -1408,29 +1538,26 @@ def create_visualizations(results):
     plt.savefig(os.path.join(figures_dir, 'original_crime_distribution.png'), dpi=300, bbox_inches='tight')
     
     # 4. Dataset Size Comparison
-    dataset_sizes = [
-        (results[0]["implementation"], 5340, 4),
-        (results[1]["implementation"], 11955, 26),
-        (results[2]["implementation"], 42674, 19),
-        (results[3]["implementation"], 85000, 17)
-    ]
-    
-    # Add implementation 5 if available
-    if len(results) > 4:
-        # Estimate the number of samples and categories from implementation 5
-        # This assumes a structure similar to implementation 4
-        dataset_sizes.append((results[4]["implementation"], 85000, 17))
+    # NEW: Add feature counts
+    dataset_sizes = []
+    for r in results:
+        dataset_sizes.append((r["implementation"], 
+                             r.get("y_test").shape[0] * 10/3,  # Estimate total from test set (30%)
+                             len(r.get("y_test").unique()),
+                             r.get("feature_count", 0)))  # Get feature count with default 0
     
     names = [d[0] for d in dataset_sizes]
     sample_sizes = [d[1] for d in dataset_sizes]
     category_counts = [d[2] for d in dataset_sizes]
+    feature_counts = [d[3] for d in dataset_sizes]
     
-    fig, ax1 = plt.subplots(figsize=(16, 8))  # Increase width from 12 to 16
+    # NEW: Create a figure with 3 subplots
+    fig, (ax1, ax3) = plt.subplots(2, 1, figsize=(16, 12))
     
     # Sample size bars (main axis)
     ax1.bar(names, sample_sizes, color='#8884d8', alpha=0.7)
     ax1.set_ylabel('Total Samples', fontsize=14)
-    ax1.set_title('Dataset Sizes and Category Counts Across Implementations', fontsize=16)
+    ax1.set_title('Dataset Sizes Across Implementations', fontsize=16)
     
     # Add second y-axis for category counts
     ax2 = ax1.twinx()
@@ -1439,14 +1566,24 @@ def create_visualizations(results):
     
     # Add values on bars and points
     for i, v in enumerate(sample_sizes):
-        ax1.text(i, v + 2000, f"{v:,}", ha='center', fontsize=10)
+        ax1.text(i, v + 2000, f"{int(v):,}", ha='center', fontsize=10)
     
     for i, v in enumerate(category_counts):
         ax2.text(i, v + 0.5, str(v), ha='center', fontsize=10, color='#82ca9d')
     
-    ax1.set_ylim(0, max(sample_sizes) * 1)
     ax1.set_ylim(0, max(sample_sizes) * 1.1)
     ax2.set_ylim(0, max(category_counts) * 1.3)
+    
+    # Feature count bar chart (third axis)
+    ax3.bar(names, feature_counts, color='#ff7f0e')
+    ax3.set_ylabel('Number of Features', fontsize=14)
+    ax3.set_title('Feature Count Across Implementations', fontsize=16)
+    
+    # Add feature count values on bars
+    for i, v in enumerate(feature_counts):
+        ax3.text(i, v + 0.3, str(v), ha='center', fontsize=10)
+    
+    ax3.set_ylim(0, max(feature_counts) * 1.2)
     
     plt.tight_layout(pad=3.0)  # Increase padding to give more space
     plt.savefig(os.path.join(figures_dir, 'dataset_size_comparison.png'), 
@@ -1637,6 +1774,42 @@ def create_visualizations(results):
             
             plt.tight_layout()
             plt.savefig(os.path.join(figures_dir, 'crime_distribution_by_temperature.png'), dpi=300, bbox_inches='tight')
+            
+            # NEW: Add temperature correlation visualization
+            if "temp_correlation_data" in results[4] and results[4]["temp_correlation_data"]:
+                corr_data = results[4]["temp_correlation_data"]
+                corr_df = pd.DataFrame(corr_data)
+                
+                if not corr_df.empty:
+                    # Sort by NB correlation
+                    corr_df = corr_df.sort_values('NB_Correlation', key=abs, ascending=False)
+                    
+                    # Plot correlations
+                    fig, ax = plt.subplots(figsize=(12, 8))
+                    
+                    # Get top 10 crime types
+                    top_crimes = corr_df.head(10)['Crime_Type'].values
+                    
+                    # Plot correlations for DT and NB
+                    x = np.arange(len(top_crimes))
+                    width = 0.35
+                    
+                    dt_corrs = corr_df.head(10)['DT_Correlation'].values
+                    nb_corrs = corr_df.head(10)['NB_Correlation'].values
+                    
+                    rects1 = ax.bar(x - width/2, dt_corrs, width, label='Decision Tree', color='#8884d8')
+                    rects2 = ax.bar(x + width/2, nb_corrs, width, label='Naive Bayes', color='#82ca9d')
+                    
+                    ax.set_ylabel('Correlation with Temperature', fontsize=14)
+                    ax.set_title('Temperature Correlation with Prediction Accuracy by Crime Type', fontsize=16)
+                    ax.set_xticks(x)
+                    ax.set_xticklabels(top_crimes, rotation=45, ha='right', fontsize=10)
+                    ax.legend(fontsize=12)
+                    ax.grid(True, linestyle='--', alpha=0.7)
+                    ax.axhline(y=0, color='k', linestyle='-', alpha=0.3)
+                    
+                    plt.tight_layout()
+                    plt.savefig(os.path.join(figures_dir, 'temperature_correlation_by_crime.png'), dpi=300, bbox_inches='tight')
 
 ###############################################################################
 # RUN ALL IMPLEMENTATIONS AND COMPARE RESULTS
@@ -1668,11 +1841,20 @@ def run_all_and_compare():
     print("COMPARISON OF ALL IMPLEMENTATIONS")
     print("="*80)
     
-    print(f"{'Implementation':<35} | {'Decision Tree Accuracy':<25} | {'Naive Bayes Accuracy':<25}")
-    print("-" * 90)
+    # NEW: Add more detailed table with feature counts and PPV accuracy
+    headers = ["Implementation", "DT Accuracy", "NB Accuracy", "Features", "PPV DT Acc", "PPV NB Acc"]
+    print(f"{headers[0]:<35} | {headers[1]:<25} | {headers[2]:<25} | {headers[3]:<10} | {headers[4]:<15} | {headers[5]:<15}")
+    print("-" * 135)
     
     for result in results:
-        print(f"{result['implementation']:<35} | {result['dt_accuracy']:<25.2f} | {result['nb_accuracy']:<25.2f}")
+        impl = result["implementation"]
+        dt_acc = result["dt_accuracy"]
+        nb_acc = result["nb_accuracy"]
+        feature_count = result.get("feature_count", "N/A")
+        ppv_dt_acc = result.get("ppv_dt_accuracy", "N/A")
+        ppv_nb_acc = result.get("ppv_nb_accuracy", "N/A")
+        
+        print(f"{impl:<35} | {dt_acc:<25.2f} | {nb_acc:<25.2f} | {feature_count:<10} | {ppv_dt_acc:<15} | {ppv_nb_acc:<15}")
 
     # Calculate total elapsed time
     total_elapsed_time = time.time() - start_total_time
