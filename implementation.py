@@ -1263,7 +1263,7 @@ def balanced_implementation_5000_temp(crime_df):
 ###############################################################################
 def create_visualizations(results):
     # Create figures directory if it doesn't exist
-    figures_dir = 'figures'  # Changed from 'data/figures' to 'figures'
+    figures_dir = 'figures'
     os.makedirs(figures_dir, exist_ok=True)
 
     # 1. Overall Accuracy Comparison
@@ -1425,7 +1425,7 @@ def create_visualizations(results):
     sample_sizes = [d[1] for d in dataset_sizes]
     category_counts = [d[2] for d in dataset_sizes]
     
-    fig, ax1 = plt.subplots(figsize=(12, 6))
+    fig, ax1 = plt.subplots(figsize=(16, 8))  # Increase width from 12 to 16
     
     # Sample size bars (main axis)
     ax1.bar(names, sample_sizes, color='#8884d8', alpha=0.7)
@@ -1448,8 +1448,11 @@ def create_visualizations(results):
     ax1.set_ylim(0, max(sample_sizes) * 1.1)
     ax2.set_ylim(0, max(category_counts) * 1.3)
     
-    plt.tight_layout()
-    plt.savefig(os.path.join(figures_dir, 'dataset_size_comparison.png'), dpi=300, bbox_inches='tight')
+    plt.tight_layout(pad=3.0)  # Increase padding to give more space
+    plt.savefig(os.path.join(figures_dir, 'dataset_size_comparison.png'), 
+                dpi=300, 
+                bbox_inches='tight',
+                pad_inches=0.5)
     
     # 5. Feature Importance Analysis
     feature_sets = [
