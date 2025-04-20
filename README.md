@@ -8,10 +8,21 @@ This repository contains a comprehensive implementation of crime classification 
 
 ## Getting Started
 
-1. **Install Python** (version 3.13.1 recommended) or ensure it is available on your system.
-2. **Clone this repository**
-
-3. **Open the project** in a text editor or IDE such as **Visual Studio Code** (VSCode).
+1. **Install Python** (version 3.13.1 or higher recommended) or ensure it is available on your system.
+2. **Clone this repository**:
+   ```bash
+   git clone https://github.com/FKande/chicago-crime-classification.git
+   cd chicago-crime-classification
+   ```
+3. **Create & activate a virtual environment**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # On Windows: venv\Scripts\activate
+   ```
+4. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Prerequisites
 
@@ -21,50 +32,15 @@ This repository contains a comprehensive implementation of crime classification 
   ```bash
   python --version
   ```
-- If you are not on Python 3.13.1, you can install or switch using one of the following methods:
-
-  **Using `pyenv`** (recommended for macOS/Linux):
-  ```bash
-  # Install pyenv if not already installed
-  curl https://pyenv.run | bash
-  # Restart your shell, then:
-  pyenv install 3.13.1
-  pyenv global 3.13.1
-  ```
-
-  **Using `venv` and system Python**:
-  ```bash
-  # Create a virtual environment with system Python
-  python -m venv venv
-  # Activate the environment
-  source venv/bin/activate   # On Windows: venv\\Scripts\\activate
-  # (If your system Python is not 3.13.1, install it through your package manager or from python.org)
-  ```
-
-  **On Linux (Ubuntu/Debian) via `apt`**:
-  ```bash
-  sudo apt update
-  sudo apt install python3.13 python3.13-venv
-  python3.13 -m venv venv
-  source venv/bin/activate
-  ```
-
-  **On macOS via Homebrew**:
-  ```bash
-  brew update
-  brew install python@3.13
-  brew link --force --overwrite python@3.13
-  ```
+- If you need to switch, consider using `pyenv` or your system package manager as described below.
 
 ### Virtual Environment
 
-- It is best practice to create and activate a virtual environment before installing dependencies:
-  ```bash
-  python -m venv venv
-  source venv/bin/activate   # On Windows: venv\\Scripts\\activate
-  ```
-
-> **Note:** The environment and package compatibility instructions below are provided as a fallback; if you regularly use Python, the code is likely to run without additional configuration.
+It is best practice to create and activate a virtual environment before installing dependencies:
+```bash
+python -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
+```
 
 ### Required Libraries
 
@@ -72,13 +48,11 @@ This repository contains a comprehensive implementation of crime classification 
   ```bash
   pip install -r requirements.txt
   ```
-
 - If you encounter version conflicts, you can install known compatible versions:
   ```bash
-  pip install pandas==2.2.3 scikit-learn==1.6.1 matplotlib==3.10.0 seaborn==0.13.2 numpy==2.2.2 imbalanced-learn==0.13.0 scipy==1.15.1 xgboost==3.0.0 anyio==4.9.0 argon2-cffi==23.1.0
+  pip install pandas==2.2.3 scikit-learn==1.6.1 matplotlib==3.10.0 seaborn==0.13.2 numpy==2.2.2 imbalanced-learn==0.13.0 scipy==1.15.1
   ```
-
-- To capture your exact environment for reproducibility, you can run:
+- To capture your exact environment for reproducibility:
   ```bash
   pip list --format=freeze > requirements-local.txt
   ```
@@ -86,14 +60,11 @@ This repository contains a comprehensive implementation of crime classification 
 ## Data Setup
 
 1. Download the Chicago crime dataset from [this link](https://drive.google.com/file/d/18f47YB0SgvsYPEUG7an4AxoDGzE7ThwA/view?usp=sharing).
-
-   > **Heads up:** The zipped dataset is around **0.5 GB**, so it may take several minutes to download depending on your connection.
-
 2. Unzip the downloaded file.
-3. Ensure you are in the root directory of the project (`chicago-crime`).
-4. **<span style="color:red">IMPORTANT:</span>** **After unzipping, extract the `chicago_crime.csv` file and move it directly into the `data/` directory (not the containing folder).**
+3. Ensure you are in the root directory of the project (`chicago-crime-classification`).
+4. **IMPORTANT:** When you unzip, you may get a folder (e.g., `chicago_crime/`) containing the CSV. Move **only** the bare `chicago_crime.csv` file—**not** its parent folder—into the `data/` directory:
    ```bash
-   mv path/to/chicago_crime.csv data/
+   mv path/to/chicago_crime/chicago_crime.csv data/
    ```
 
 ## Running the Implementation
@@ -101,6 +72,10 @@ This repository contains a comprehensive implementation of crime classification 
 Execute the main script:
 ```bash
 python implementation.py
+```
+If that fails on your system, you can also try:
+```bash
+py implementation.py
 ```
 
 This will:
@@ -114,7 +89,7 @@ This will:
 ## Project Structure
 
 ```
-chicago-crime/
+chicago-crime-classification/
 ├── data/                      # Datasets
 │   ├── chicago_crime.csv      # Main crime dataset (you must download this)
 │   ├── temperature.csv        # Generated temperature data
@@ -142,7 +117,7 @@ Each implementation trains both Decision Tree and Naive Bayes models and evaluat
 
 ## Results
 
-After running the script, you'll see a comparison of all implementations in the terminal output. Visualizations will be saved to the `figures` directory, including:
+After running the script, you'll see a detailed comparison of all implementations in your terminal. Visualizations will be saved to the `figures` directory, including:
 
 - Model accuracy comparison across implementations
 - Performance analysis for specific crime categories
