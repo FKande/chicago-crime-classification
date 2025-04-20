@@ -14,7 +14,10 @@ This repository contains a comprehensive implementation of crime classification 
    git clone https://github.com/FKande/chicago-crime-classification.git
    cd chicago-crime-classification
    ```
-3. **Create & activate a virtual environment**:
+3. **Optional:** Create & activate a virtual environment (only if you wish to isolate dependencies and avoid impacting your global Python packages):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # On Windows: venv\Scripts\activate
    ```bash
    python -m venv venv
    source venv/bin/activate   # On Windows: venv\Scripts\activate
@@ -34,9 +37,12 @@ This repository contains a comprehensive implementation of crime classification 
   ```
 - If you need to switch, consider using `pyenv` or your system package manager as described below.
 
-### Virtual Environment
+### Optional: Virtual Environment
 
-It is best practice to create and activate a virtual environment before installing dependencies:
+If you already have a working Python environment and are comfortable managing packages globally, you can skip this. Otherwise, to isolate dependencies and avoid conflicts, you can create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
 ```bash
 python -m venv venv
 source venv/bin/activate   # On Windows: venv\Scripts\activate
@@ -48,11 +54,17 @@ source venv/bin/activate   # On Windows: venv\Scripts\activate
   ```bash
   pip install -r requirements.txt
   ```
+- For most Python users, running `pip install -r requirements.txt` should work without issues.
+
+**Fallback tips (if you run into problems):**
 - If you encounter version conflicts, you can install known compatible versions:
   ```bash
   pip install pandas==2.2.3 scikit-learn==1.6.1 matplotlib==3.10.0 seaborn==0.13.2 numpy==2.2.2 imbalanced-learn==0.13.0 scipy==1.15.1
   ```
 - To capture your exact environment for reproducibility:
+  ```bash
+  pip list --format=freeze > requirements-local.txt
+  ```
   ```bash
   pip list --format=freeze > requirements-local.txt
   ```
@@ -64,7 +76,7 @@ source venv/bin/activate   # On Windows: venv\Scripts\activate
 3. Ensure you are in the root directory of the project (`chicago-crime-classification`).
 4. **IMPORTANT:** When you unzip, you may get a folder (e.g., `chicago_crime/`) containing the CSV. Move **only** the bare `chicago_crime.csv` file—**not** its parent folder—into the `data/` directory:
    ```bash
-   mv path/to/chicago_crime/chicago_crime.csv data/
+   mv path/to/chicago_crime_classification/chicago_crime.csv data/
    ```
 
 ## Running the Implementation
